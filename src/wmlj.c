@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.11 2002/01/08 18:34:43 sgt Exp $
+ * $Id: wmlj.c,v 1.12 2002/01/08 18:58:34 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -28,8 +28,8 @@ static gint pixmap_state = 0;
 static GtkWidget *logo; /* the animated pixmap widget */
 
 /* global timeout id's */
-guint cf_timeout_id;
-guint anim_timeout_id;
+guint cf_timeout_id = 0;
+guint anim_timeout_id = 0;
 
 static GdkPixmap *datapix[2] = { 0 };
 static GdkBitmap *datamask[2] = { 0 };
@@ -198,9 +198,6 @@ int main( int argc, char *argv[] ) {
     /* perform a client login */
     g_idle_add((GSourceFunc)login_check_friends_idle_cb, NULL);
   }
-
-  /* Timed events */
-  wmlj_cf_timeout_add();
 
   gdk_threads_enter();
   gtk_main();

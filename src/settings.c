@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: settings.c,v 1.9 2002/01/08 18:34:43 sgt Exp $
+ * $Id: settings.c,v 1.10 2002/01/08 18:58:34 sgt Exp $
  */
 
 #include <string.h>
@@ -32,16 +32,9 @@ ok_cb(GtkWidget *widget, GtkWidget *dialog) {
 
   gtk_widget_destroy(dialog);
 
-  /* relogin */
-  if (login_changed)
+  /* relogin and adjust the update interval */
+  if (login_changed || interval_changed)
     g_idle_add((GSourceFunc)login_check_friends_idle_cb, NULL);
-
-  /* adjust the update interval */
-  if (login_changed || interval_changed) {
-    wmlj_cf_timeout_remove();
-    wmlj_cf_timeout_add();
-  }
-
 }
 
 static void
