@@ -36,7 +36,7 @@
 #include <string.h>
 #endif
 
-#include <sys/md5.h>
+#include "md5.h"
 
 static void MD5Transform __P((u_int32_t [4], const unsigned char [64]));
 
