@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: settings.c,v 1.3 2002/01/05 22:49:46 sgt Exp $
+ * $Id: settings.c,v 1.4 2002/01/06 13:33:49 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -21,6 +21,8 @@ ok_cb(GtkWidget *widget, GtkWidget *dialog) {
   /* adjust the update interval */
 
   memcpy(&conf, &newconf, sizeof(Config));
+
+  rc_config_write(&conf);
 
   /* adjust the update interval */
   wmlj_cf_timeout_remove();
