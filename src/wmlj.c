@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: wmlj.c,v 1.4 2002/01/05 23:09:55 sgt Exp $
+ * $Id: wmlj.c,v 1.5 2002/01/06 13:26:04 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -17,6 +17,7 @@
 
 #include "menu.h"
 #include "network.h"
+#include "settings.h"
 #include "spawn.h"
 #include "wmlj.h"
 #include "config.h"
@@ -178,9 +179,6 @@ int main( int argc, char *argv[] ) {
 
   anim_timeout_id = cf_timeout_id = 0;
 
-  /* read the configuration */
-  rc_config_read(&conf);
-
   gtk_init(&argc, &argv);
 
   wmlj_main = wmlj_main_create(argc, argv);
@@ -188,6 +186,17 @@ int main( int argc, char *argv[] ) {
   gtk_widget_show(wmlj_main);
 
   gdk_threads_enter();
+
+  /* if first time run, show settings dialog */
+  if (!rc_exists()) {
+    /* read the configuration */
+    rc_config_read(&conf);
+    /* show settings dialog */
+    cmd_settings(wmlj_main, NULL);
+  }
+  else
+    /* read the configuration */
+    rc_config_read(&conf);
 
   /* Timed events */
   wmlj_cf_timeout_add();

@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: rc.c,v 1.4 2002/01/06 00:44:05 sgt Exp $
+ * $Id: rc.c,v 1.5 2002/01/06 13:26:04 sgt Exp $
  */
 
 #include <stdio.h>
@@ -107,6 +107,19 @@ rc_config_dump(Config *conf) {
   fprintf(stderr, "Browser: '%s'\n", conf->browser);
   fprintf(stderr, "LJ client: '%s'\n", conf->lj_client);
   fprintf(stderr, "\n");
+}
+
+gboolean
+rc_exists() {
+  FILE *f;
+
+  if ((f = fopen(rc_path(), "r")) == NULL) {
+    return FALSE;
+  }
+  else {
+    fclose(f);
+    return TRUE;
+  }
 }
 
 gboolean

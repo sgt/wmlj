@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: rc.h,v 1.3 2002/01/05 22:49:46 sgt Exp $
+ * $Id: rc.h,v 1.4 2002/01/06 13:26:04 sgt Exp $
  */
 
 #ifndef WMLJ_RC_H
@@ -38,6 +38,7 @@ typedef struct {
 /* The config file structure */
 extern Config conf;
 extern void rc_config_dump(Config *conf);
+extern gboolean rc_exists();
 extern gboolean rc_config_read(Config *conf);
 extern gboolean rc_config_write(Config *conf);
 
