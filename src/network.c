@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.11 2002/01/08 18:14:53 sgt Exp $
+ * $Id: network.c,v 1.12 2002/01/08 18:34:42 sgt Exp $
  */
 
 #include <string.h>
@@ -363,9 +363,10 @@ lj_login() {
 }
 
 gboolean
-login_idle_cb() {
+login_check_friends_idle_cb() {
   gdk_threads_enter();
   lj_login();
+  check_friends();
   gdk_threads_leave();
   return FALSE;
 }

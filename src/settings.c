@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: settings.c,v 1.8 2002/01/08 18:14:53 sgt Exp $
+ * $Id: settings.c,v 1.9 2002/01/08 18:34:43 sgt Exp $
  */
 
 #include <string.h>
@@ -34,7 +34,7 @@ ok_cb(GtkWidget *widget, GtkWidget *dialog) {
 
   /* relogin */
   if (login_changed)
-    g_idle_add((GSourceFunc)login_idle_cb, NULL);
+    g_idle_add((GSourceFunc)login_check_friends_idle_cb, NULL);
 
   /* adjust the update interval */
   if (login_changed || interval_changed) {
