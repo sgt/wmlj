@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: network.c,v 1.3 2002/01/05 22:49:46 sgt Exp $
+ * $Id: network.c,v 1.4 2002/01/06 00:57:17 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -163,6 +163,12 @@ request_run(gchar *postfields) {
     /* it's POST we're trying to make */
     curl_easy_setopt(req->curl, CURLOPT_POST, 1);
 
+    /* proxy, if needed */
+    if (conf.use_proxy) {
+      curl_easy_setopt(req->curl, CURLOPT_PROXY, conf.proxy_server);
+      curl_easy_setopt(req->curl, CURLOPT_PROXYPORT, conf.proxy_port);
+    }
+
     /* self-promotion */
     curl_easy_setopt(req->curl, CURLOPT_USERAGENT, USERAGENT);
 
@@ -238,7 +244,7 @@ check_friends() {
     if (DEBUG)
       fprintf(stderr, "check_friends: Request failed.\n");
 
-    if (g_strcasecmp(g_hash_table_lookup(hash, "curl"), "error"))
+    if (g_hash_table_lookup(hash, "curl") != NULL)
       network_error("Friendlist check failed. "
 		    "Please review your login information.");
 
