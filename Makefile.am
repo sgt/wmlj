@@ -1,4 +1,4 @@
-SUBDIRS = src
+SUBDIRS = . src
 
 man_MANS = wmlj.1
 
