@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.12 2002/01/08 18:58:34 sgt Exp $
+ * $Id: wmlj.c,v 1.13 2002/01/09 16:13:54 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -30,6 +30,8 @@ static GtkWidget *logo; /* the animated pixmap widget */
 /* global timeout id's */
 guint cf_timeout_id = 0;
 guint anim_timeout_id = 0;
+
+pthread_mutex_t network_mut;
 
 static GdkPixmap *datapix[2] = { 0 };
 static GdkBitmap *datamask[2] = { 0 };
@@ -176,6 +178,8 @@ int main( int argc, char *argv[] ) {
   GtkWidget *wmlj_main;
 
   g_thread_init(NULL);
+
+  pthread_mutex_init(&network_mut, NULL);
 
   anim_timeout_id = cf_timeout_id = 0;
 

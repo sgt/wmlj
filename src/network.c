@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.12 2002/01/08 18:34:42 sgt Exp $
+ * $Id: network.c,v 1.13 2002/01/09 16:13:54 sgt Exp $
  */
 
 #include <string.h>
@@ -205,8 +205,13 @@ request_run(gchar *postfields) {
 
     /* do the magic */
     /* req->res = curl_easy_perform(req->curl); */
-    pthread_create(&threadid, NULL, curl_thread, req);
-    gtk_main();
+
+    /* create a thread only if there is no other thread running */
+    if (pthread_mutex_trylock(&network_mut) == 0) {
+      pthread_create(&threadid, NULL, curl_thread, req);
+      gtk_main(); /* the thread will quit this */
+      pthread_mutex_unlock(&network_mut);
+    }
 
     if (req->res != CURLE_OK) {
       network_error(errorbuf);
@@ -365,8 +370,11 @@ lj_login() {
 gboolean
 login_check_friends_idle_cb() {
   gdk_threads_enter();
+
   lj_login();
   check_friends();
+
   gdk_threads_leave();
+
   return FALSE;
 }

@@ -3,12 +3,13 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.h,v 1.3 2002/01/06 15:48:00 sgt Exp $
+ * $Id: wmlj.h,v 1.4 2002/01/09 16:13:54 sgt Exp $
  */
 
 #ifndef WMLJ_WMLJ_H
 #define WMLJ_WMLJ_H
 
+#include <pthread.h>
 #include <glib.h>
 
 #include "config.h"
@@ -29,6 +30,7 @@ extern CheckFriends cf;
 
 extern guint cf_timeout_id;
 extern guint anim_timeout_id;
+extern pthread_mutex_t network_mut;
 
 extern void wmlj_cf_timeout_add();
 extern void wmlj_cf_timeout_remove();
