@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: rc.c,v 1.3 2002/01/05 22:49:46 sgt Exp $
+ * $Id: rc.c,v 1.4 2002/01/06 00:44:05 sgt Exp $
  */
 
 #include <stdio.h>
@@ -18,12 +18,12 @@
 Config conf; /* global var for configuration storage */
 
 static void
-rc_space_skip(FILE *file) {
+rc_space_skip(FILE *file, gboolean to_newline) {
   int c;
 
   do {
     c = fgetc(file);
-  } while (isspace(c) && c != EOF);
+  } while (isspace(c) && c != EOF && (to_newline || c != '\n'));
   ungetc(c, file);
 }
 
@@ -31,7 +31,7 @@ static void
 rc_token_read(FILE *f, GString *buf, gboolean to_newline) {
   int c;
 
-  rc_space_skip(f);
+  rc_space_skip(f, FALSE);
 
   /* get the next token */
   do {
@@ -42,7 +42,7 @@ rc_token_read(FILE *f, GString *buf, gboolean to_newline) {
   ungetc(c, f);
   buf = g_string_truncate(buf, (buf->len - 1));
 
-  rc_space_skip(f);
+  rc_space_skip(f, to_newline);
 }
 
 static gchar*
