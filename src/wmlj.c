@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: wmlj.c,v 1.1 2002/01/05 15:31:18 sgt Exp $
+ * $Id: wmlj.c,v 1.2 2002/01/05 17:42:24 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -17,6 +17,7 @@
 
 #include "menu.h"
 #include "network.h"
+#include "spawn.h"
 #include "wmlj.h"
 #include "config.h"
 
@@ -50,12 +51,32 @@ wmlj_button_press(GtkWidget *widget, GdkEvent *event,
   case GDK_BUTTON_PRESS:
     switch (event->button.button) {
     case 2:
+      /* middle button click */
       if (DEBUG) {
 	rc_config_dump(&conf);
 	return FALSE;
       }
     case 3:
+      /* right button click */
       return wmlj_menu_popup(widget, event, callback_data);
+    default:
+      return FALSE;
+    }
+  case GDK_2BUTTON_PRESS:
+    switch (event->button.button) {
+    case 1:
+      /* left button double-click */
+      spawn_url(conf.browser,
+		g_strdup_printf("http://%s:%d/users/%s/friends/",
+				conf.lj_server,
+				conf.lj_port,
+				conf.user));
+
+      /* reset the monitor */
+      cf.lastupdate = g_strdup("");
+      wmlj_anim_timeout_remove();
+
+      return FALSE;
     default:
       return FALSE;
     }
@@ -78,22 +99,34 @@ wmlj_animate_pixmap(GtkWidget* logo) {
 }
 
 void wmlj_cf_timeout_add() {
+  if (cf_timeout_id)
+    return;
+
   cf_timeout_id = gtk_timeout_add(conf.interval*1000,
 				  (GtkFunction)check_friends,
 				  NULL);
 }
 
 void wmlj_cf_timeout_remove() {
-  gtk_timeout_remove(cf_timeout_id);
+  if (cf_timeout_id) {
+    gtk_timeout_remove(cf_timeout_id);
+    cf_timeout_id = 0;
+  }
 }
 
 void wmlj_anim_timeout_add() {
+  if (anim_timeout_id)
+    return;
+
   anim_timeout_id = gtk_timeout_add(200, (GtkFunction)wmlj_animate_pixmap,
 				    logo);
 }
 
 void wmlj_anim_timeout_remove() {
-  gtk_timeout_remove(anim_timeout_id);
+  if (anim_timeout_id) {
+    gtk_timeout_remove(anim_timeout_id);
+    anim_timeout_id = 0;
+  }
 }
   
 /*
@@ -135,6 +168,8 @@ int main( int argc, char *argv[] ) {
   GtkWidget *wmlj_main;
 
   g_thread_init(NULL);
+
+  anim_timeout_id = cf_timeout_id = 0;
 
   /* read the configuration */
   rc_config_read(&conf);

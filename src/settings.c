@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: settings.c,v 1.1 2002/01/05 15:31:18 sgt Exp $
+ * $Id: settings.c,v 1.2 2002/01/05 17:42:24 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -12,12 +12,20 @@
 #include "dlg.h"
 #include "rc.h"
 #include "settings.h"
+#include "wmlj.h"
 
 static Config newconf;
 
 static void
 ok_cb(GtkWidget *widget, GtkWidget *dialog) {
+  /* adjust the update interval */
+
   memcpy(&conf, &newconf, sizeof(Config));
+
+  /* adjust the update interval */
+  wmlj_cf_timeout_remove();
+  wmlj_cf_timeout_add();
+
   gtk_widget_destroy(dialog);
 }
 
@@ -117,7 +125,9 @@ settings_account() {
 			       "update interval. If you enter a smaller "
 			       "value, it will be automatically adjusted "
 			       "to meet the server requirements");
+	gtk_misc_set_alignment(GTK_MISC(desc_l), 0, 0.5);
 	gtk_label_set_line_wrap(GTK_LABEL(desc_l), TRUE);
+	gtk_label_set_justify(GTK_LABEL(desc_l), GTK_JUSTIFY_LEFT);
 	gtk_box_pack_start(GTK_BOX(interval_box), desc_l, FALSE, FALSE, 0);
       }
       gtk_container_add(GTK_CONTAINER(frame), interval_box);
@@ -178,6 +188,39 @@ settings_connection() {
   return vbox;
 }
 
+static GtkWidget*
+settings_browser() {
+  /* XXX should check if command has one and only %s! */
+  GtkWidget *vbox;
+
+  vbox = gtk_vbox_new(FALSE, 10); {
+    GtkWidget *desc_l, *cmd_l, *cmd_e;
+
+    gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
+
+    desc_l = gtk_label_new("This command will be evaluated by /bin/sh.\n"
+			   "Use %s in the command line in the place of the "
+			   "URL.");
+    gtk_misc_set_alignment(GTK_MISC(desc_l), 0, 0.5);
+    gtk_label_set_justify(GTK_LABEL(desc_l), GTK_JUSTIFY_LEFT);
+    gtk_box_pack_start(GTK_BOX(vbox), desc_l, FALSE, FALSE, 0);
+
+    cmd_l = gtk_label_new("Command:");
+    gtk_misc_set_alignment(GTK_MISC(cmd_l), 0, 0.5);
+    gtk_label_set_justify(GTK_LABEL(cmd_l), GTK_JUSTIFY_LEFT);
+    gtk_box_pack_start(GTK_BOX(vbox), cmd_l, FALSE, FALSE, 0);
+
+    cmd_e = dlg_entry_new_with_text(g_strdup(newconf.browser));
+    gtk_box_pack_start(GTK_BOX(vbox), cmd_e, FALSE, FALSE, 0);
+
+    gtk_signal_connect(GTK_OBJECT(cmd_e), "changed",
+		       GTK_SIGNAL_FUNC(dlg_entry_str_cb),
+		       &newconf.browser);
+  }
+
+  return vbox;
+}
+
 void
 cmd_settings(GtkWidget *parent, GdkEvent *event) {
   GtkWidget *dialog, *nb;
@@ -200,6 +243,9 @@ cmd_settings(GtkWidget *parent, GdkEvent *event) {
     gtk_notebook_append_page(GTK_NOTEBOOK(nb), 
 			     settings_connection(),
 			     gtk_label_new("Connection"));
+    gtk_notebook_append_page(GTK_NOTEBOOK(nb),
+			     settings_browser(),
+			     gtk_label_new("Web browser"));
 
     dlg_set_contents(dialog, nb);
   }

@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: rc.c,v 1.1 2002/01/05 15:31:18 sgt Exp $
+ * $Id: rc.c,v 1.2 2002/01/05 17:42:24 sgt Exp $
  */
 
 #include <stdio.h>
@@ -28,7 +28,7 @@ rc_space_skip(FILE *file) {
 }
 
 static void
-rc_token_read(FILE *f, GString *buf) {
+rc_token_read(FILE *f, GString *buf, gboolean to_newline) {
   int c;
 
   rc_space_skip(f);
@@ -37,7 +37,7 @@ rc_token_read(FILE *f, GString *buf) {
   do {
     c = fgetc(f);
     buf = g_string_append_c(buf, c);
-  } while (! isspace(c) && c != EOF);
+  } while (c != EOF && ((to_newline && c != '\n') || !isspace(c)));
 
   ungetc(c, f);
   buf = g_string_truncate(buf, (buf->len - 1));
@@ -61,10 +61,10 @@ rc_option_read(FILE *f, RCOption *option) {
 
   buf = g_string_sized_new(128);
 
-  rc_token_read(f, buf);
+  rc_token_read(f, buf, FALSE);
   option->key = g_strdup(buf->str);
   buf = g_string_truncate(buf, 0);
-  rc_token_read(f, buf);
+  rc_token_read(f, buf, TRUE);
   option->value = g_strdup(buf->str);
 
   if (DEBUG) {
@@ -87,7 +87,9 @@ rc_config_default(Config *conf) {
   conf->proxy_server = g_strdup("");
   conf->proxy_port = 80;
 
-  conf->interval = 45;
+  conf->interval = 300;
+
+  conf->browser = g_strdup("netscape-remote -remote %s");
 }
 
 void
@@ -101,6 +103,7 @@ rc_config_dump(Config *conf) {
   fprintf(stderr, "Proxy server: '%s'\n", conf->proxy_server);
   fprintf(stderr, "Proxy port: '%d'\n", conf->proxy_port);
   fprintf(stderr, "Interval: '%d'\n", conf->interval);
+  fprintf(stderr, "Browser: '%s'\n", conf->browser);
   fprintf(stderr, "\n");
 }
 
@@ -151,6 +154,9 @@ rc_config_read(Config *conf) {
     else if (g_strcasecmp(option.key, "interval") == 0) {
       conf->interval = atoi(option.value);
     }
+    else if (g_strcasecmp(option.key, "browser") == 0) {
+      conf->browser = g_strdup(option.value);
+    }
     /* otherwise, ignore the line */
   }
 
@@ -200,6 +206,10 @@ rc_config_write(Config *conf) {
 
   option.key = "Interval";
   option.value = g_strdup_printf("%d", conf->interval);
+  rc_option_write(f, &option);
+
+  option.key = "Browser";
+  option.value = g_strdup(conf->browser);
   rc_option_write(f, &option);
 
   fclose(f);

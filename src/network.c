@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: network.c,v 1.1 2002/01/05 15:31:18 sgt Exp $
+ * $Id: network.c,v 1.2 2002/01/05 17:42:24 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -14,6 +14,7 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
+#include "dlg.h"
 #include "network.h"
 #include "rc.h"
 #include "wmlj.h"
@@ -23,6 +24,29 @@ typedef struct {
   CURLcode res;
   GString *buf;
 } Request;
+
+/* a dialog for showing network errors */
+static void
+network_error(gchar *msg) {
+  GtkWidget *dialog, *vbox;
+
+  dialog = dlg_new(NULL, "wmlj network error");
+
+  vbox = gtk_vbox_new(FALSE, 5); {
+    GtkWidget *label;
+
+    label = gtk_label_new(g_strdup_printf("wmlj network error:\n\n%s", msg));
+    gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+    gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+    gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+
+    gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, FALSE, 0);
+  }
+
+  dlg_set_contents(dialog, vbox);
+  dlg_add_close(dialog, NULL);
+  gtk_widget_show(dialog);
+}
 
 static size_t curlwrite(void *ptr, size_t size, size_t nmemb, void *stream) {
   Request *req = stream;
@@ -100,10 +124,11 @@ parse_response(char *buf) {
 }
 
 static GHashTable*
-request_run(char *postfields) {
+request_run(gchar *postfields) {
   Request *req;
   GString *url;
   GHashTable *hash;
+  gchar errorbuf[CURL_ERROR_SIZE];
 
   req = g_new0(Request, 1);
 
@@ -139,8 +164,15 @@ request_run(char *postfields) {
     if (DEBUG)
       curl_easy_setopt(req->curl, CURLOPT_VERBOSE, 1);
 
+    /* here we can get a fancy error message, eh? */
+    curl_easy_setopt(req->curl, CURLOPT_ERRORBUFFER, errorbuf);
+
     /* do the magic */
     req->res = curl_easy_perform(req->curl);
+
+    if (req->res != CURLE_OK) {
+      network_error(errorbuf);
+    }
 
     /* always cleanup */
     curl_easy_cleanup(req->curl);
@@ -153,6 +185,20 @@ request_run(char *postfields) {
 
     return hash;
   }
+}
+
+static gboolean
+request_succeeded(GHashTable *result) {
+  char *success;
+
+  if (result == NULL)
+    return FALSE;
+
+  success = g_hash_table_lookup(result, "success");
+  if (success == NULL)
+    return FALSE;
+
+  return (g_strcasecmp(success, "OK") == 0);
 }
 
 gboolean
@@ -177,17 +223,28 @@ check_friends() {
 
   g_string_free(req_str, TRUE);
 
+  if (!request_succeeded(hash)) {
+    if (DEBUG)
+      fprintf(stderr, "check_friends: Request failed.\n");
+
+    network_error("Friendlist check failed. "
+		  "Please review your login information.");
+
+    return FALSE;
+  }
+
   cf.lastupdate = g_strdup(g_hash_table_lookup(hash, "lastupdate"));
   cf.new_messages = atoi(g_hash_table_lookup(hash, "new"));
 
   /* interval shouldn't be less than one that's required by the server */
   ok_interval = MAX(conf.interval,
 		    atoi(g_hash_table_lookup(hash, "interval")));
-  if (conf.interval < ok_interval) {
+  if (conf.interval < ok_interval)
     conf.interval = ok_interval;
-    wmlj_cf_timeout_remove();
-    wmlj_cf_timeout_add();
-  }
+
+  /* adjust the interval in case it has been changed */
+  wmlj_cf_timeout_remove();
+  wmlj_cf_timeout_add();
 
   /* if there are new messages, let's start the animation */
   if (cf.new_messages > 0)
