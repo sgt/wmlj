@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.h,v 1.3 2002/01/06 15:48:00 sgt Exp $
+ * $Id: network.h,v 1.4 2002/01/08 18:14:53 sgt Exp $
  */
 
 #ifndef WMLJ_NETWORK_H
@@ -14,5 +14,6 @@
 
 extern gboolean check_friends();
 extern gboolean lj_login();
+extern gboolean login_idle_cb();
 
 #endif /* WMLJ_NETWORK_H */

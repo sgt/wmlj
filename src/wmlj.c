@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.9 2002/01/08 17:03:03 sgt Exp $
+ * $Id: wmlj.c,v 1.10 2002/01/08 18:14:53 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -196,7 +196,7 @@ int main( int argc, char *argv[] ) {
     /* read the configuration */
     rc_config_read(&conf);
     /* perform a client login */
-    lj_login();
+    g_idle_add((GSourceFunc)login_idle_cb, NULL);
   }
 
   /* Run an initial check for friendlist */
