@@ -3,9 +3,10 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.14 2002/01/10 12:08:50 sgt Exp $
+ * $Id: network.c,v 1.15 2002/02/06 13:46:03 sgt Exp $
  */
 
+#include <time.h>
 #include <string.h>
 #include <stdlib.h>
 #include <glib.h>
@@ -196,7 +197,7 @@ request_run(gchar *postfields) {
       hash = hash_curl_error();
     }
     else {
-       hash = parse_response(req->buf->str);
+      hash = parse_response(req->buf->str);
     }
 
     /* always cleanup */
@@ -273,9 +274,10 @@ check_friends() {
     if (DEBUG)
       fprintf(stderr, "check_friends: Request failed.\n");
 
-    if (g_hash_table_lookup(hash, "http-error") == NULL)
+    if (g_hash_table_lookup(hash, "http-error") == NULL) {
       network_error("Friendlist check failed. "
 		    "Please review your login information.");
+    }
 
     return FALSE;
   }
@@ -327,9 +329,10 @@ lj_login() {
     if (DEBUG)
       fprintf(stderr, "lj_login: Request failed.\n");
 
-    if (g_hash_table_lookup(hash, "http-error") == NULL)
+    if (g_hash_table_lookup(hash, "http-error") == NULL) {
       network_error("Login failed. "
 		    "Please review your login information.");
+    }
 
     return FALSE;
   }

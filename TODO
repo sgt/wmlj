@@ -1,5 +1,5 @@
- - add thread mutexes
  - indicate a number of unread messages
  - try to read LogJam's rc file if .wmljrc isn't there
- - perform a valid LJ login
+ - perform a valid LJ login (with menus and stuff)
  - draw a nicer animation
+ - lastupdate should change to now when the icon is double-clicked

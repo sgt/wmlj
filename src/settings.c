@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: settings.c,v 1.11 2002/01/10 12:08:50 sgt Exp $
+ * $Id: settings.c,v 1.12 2002/02/06 13:46:03 sgt Exp $
  */
 
 #include <string.h>
@@ -34,8 +34,7 @@ ok_cb(GtkWidget *widget, GtkWidget *dialog) {
 
   /* relogin and adjust the update interval */
   if (login_changed || interval_changed)
-    pthread_create(&wmlj.network_thread, NULL,
-		   login_check_friends_thread, NULL);
+    network_exec_thread();
 }
 
 static void
