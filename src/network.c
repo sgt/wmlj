@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.13 2002/01/09 16:13:54 sgt Exp $
+ * $Id: network.c,v 1.14 2002/01/10 12:08:50 sgt Exp $
  */
 
 #include <string.h>
@@ -14,8 +14,6 @@
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
-
-#include <pthread.h>
 
 #include "md5.h"
 #include "dlg.h"
@@ -136,25 +134,12 @@ parse_response(char *buf) {
   return hash;
 }
 
-static void *
-curl_thread(void *data) {
-  Request *req = data;
-
-  req->res = curl_easy_perform(req->curl);
-
-  gdk_threads_enter();
-  gtk_main_quit();
-  gdk_threads_leave();
-  return NULL;
-}
-
 static GHashTable*
 request_run(gchar *postfields) {
   Request *req;
   GString *url;
   GHashTable *hash;
   gchar errorbuf[CURL_ERROR_SIZE];
-  pthread_t threadid;
 
   req = g_new0(Request, 1);
 
@@ -204,14 +189,7 @@ request_run(gchar *postfields) {
     curl_easy_setopt(req->curl, CURLOPT_ERRORBUFFER, errorbuf);
 
     /* do the magic */
-    /* req->res = curl_easy_perform(req->curl); */
-
-    /* create a thread only if there is no other thread running */
-    if (pthread_mutex_trylock(&network_mut) == 0) {
-      pthread_create(&threadid, NULL, curl_thread, req);
-      gtk_main(); /* the thread will quit this */
-      pthread_mutex_unlock(&network_mut);
-    }
+    req->res = curl_easy_perform(req->curl);
 
     if (req->res != CURLE_OK) {
       network_error(errorbuf);
@@ -281,11 +259,11 @@ check_friends() {
   GString *req_str;
   gint ok_interval;
 
-  if (cf.lastupdate == NULL)
-    cf.lastupdate = g_strdup("");
+  if (wmlj.cf.lastupdate == NULL)
+    wmlj.cf.lastupdate = g_strdup("");
 
   req_str = lj_protocol_string_new("checkfriends");
-  g_string_sprintfa(req_str, "lastupdate=%s&", cf.lastupdate);
+  g_string_sprintfa(req_str, "lastupdate=%s&", wmlj.cf.lastupdate);
 
   hash = request_run(req_str->str);
 
@@ -302,8 +280,8 @@ check_friends() {
     return FALSE;
   }
 
-  cf.lastupdate = g_strdup(g_hash_table_lookup(hash, "lastupdate"));
-  cf.new_messages = atoi(g_hash_table_lookup(hash, "new"));
+  wmlj.cf.lastupdate = g_strdup(g_hash_table_lookup(hash, "lastupdate"));
+  wmlj.cf.new_messages = atoi(g_hash_table_lookup(hash, "new"));
 
   /* interval shouldn't be less than one that's required by the server */
   ok_interval = MAX(conf.interval,
@@ -315,7 +293,7 @@ check_friends() {
   wmlj_cf_timeout_remove();
 
   /* if there are new messages, let's start the animation */
-  if (cf.new_messages > 0)
+  if (wmlj.cf.new_messages > 0)
     wmlj_anim_timeout_add();
   else
     /* resume polling (possibly, with adjusted interval) */
@@ -323,7 +301,7 @@ check_friends() {
 
   if (DEBUG)
     fprintf(stderr, "check_friends: new '%d'; last '%s'; interval '%s'\n",
-	    cf.new_messages, cf.lastupdate,
+	    wmlj.cf.new_messages, wmlj.cf.lastupdate,
 	    (char*)g_hash_table_lookup(hash, "interval"));
 
   hash_free(hash);
@@ -367,14 +345,18 @@ lj_login() {
   return TRUE;
 }
 
-gboolean
-login_check_friends_idle_cb() {
-  gdk_threads_enter();
-
+void*
+login_check_friends_thread() {
+  pthread_mutex_lock(&wmlj.network_mutex);
   lj_login();
   check_friends();
-
-  gdk_threads_leave();
+  pthread_mutex_unlock(&wmlj.network_mutex);
 
   return FALSE;
+}
+
+void
+network_exec_thread() {
+  pthread_create(&wmlj.network_thread, NULL,
+		 login_check_friends_thread, NULL);
 }

@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: menu.c,v 1.2 2002/01/06 13:45:08 sgt Exp $
+ * $Id: menu.c,v 1.3 2002/01/10 12:08:50 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -12,6 +12,7 @@
 #include "menu.h"
 #include "settings.h"
 #include "about.h"
+#include "wmlj.h"
 
 static void
 cmd_quit(GtkWidget *widget, GdkEvent *event) {
@@ -29,10 +30,10 @@ wmlj_menu_create() {
     GtkItemFactory *item_factory;
 
     GtkItemFactoryEntry menu_items[] = {
-      { "/_Settings", NULL, cmd_settings, 0, NULL},
-      { "/_About", NULL, cmd_about, 0, NULL},
+      { "/Settings", NULL, cmd_settings, 0, NULL},
+      { "/About", NULL, cmd_about, 0, NULL},
       { "/sep1", NULL, NULL, 0, "<Separator>" },
-      { "/_Quit", NULL, cmd_quit, 0, NULL }
+      { "/Quit", NULL, cmd_quit, 0, NULL }
     };
 
     gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
@@ -42,6 +43,8 @@ wmlj_menu_create() {
 				  NULL);
 
     wmlj_menu = gtk_item_factory_get_widget (item_factory, "<main>");
+
+    wmlj.msettings = gtk_item_factory_get_widget(item_factory, "/Settings");
 
     gtk_widget_show(wmlj_menu);
   }

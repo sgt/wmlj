@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.h,v 1.4 2002/01/09 16:13:54 sgt Exp $
+ * $Id: wmlj.h,v 1.5 2002/01/10 12:08:50 sgt Exp $
  */
 
 #ifndef WMLJ_WMLJ_H
@@ -11,6 +11,7 @@
 
 #include <pthread.h>
 #include <glib.h>
+#include <gtk/gtk.h>
 
 #include "config.h"
 
@@ -26,11 +27,21 @@ typedef struct {
   gint new_messages;
 } CheckFriends;
 
-extern CheckFriends cf;
+typedef struct {
+  GtkWidget *win;
 
-extern guint cf_timeout_id;
-extern guint anim_timeout_id;
-extern pthread_mutex_t network_mut;
+  GtkWidget *msettings;
+
+  guint cf_timeout_id;
+  guint anim_timeout_id;
+
+  pthread_t network_thread;
+  pthread_mutex_t network_mutex;
+
+  CheckFriends cf;
+} Wmlj;
+
+extern Wmlj wmlj;
 
 extern void wmlj_cf_timeout_add();
 extern void wmlj_cf_timeout_remove();

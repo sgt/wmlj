@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.13 2002/01/09 16:13:54 sgt Exp $
+ * $Id: wmlj.c,v 1.14 2002/01/10 12:08:50 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -27,11 +27,7 @@ CheckFriends cf = { 0 }; /* global */
 static gint pixmap_state = 0;
 static GtkWidget *logo; /* the animated pixmap widget */
 
-/* global timeout id's */
-guint cf_timeout_id = 0;
-guint anim_timeout_id = 0;
-
-pthread_mutex_t network_mut;
+Wmlj wmlj;
 
 static GdkPixmap *datapix[2] = { 0 };
 static GdkBitmap *datamask[2] = { 0 };
@@ -68,7 +64,7 @@ wmlj_button_press(GtkWidget *widget, GdkEvent *event,
     switch (event->button.button) {
     case 1:
       /* left button double-click */
-      if (anim_timeout_id) {
+      if (wmlj.anim_timeout_id) {
 	/* animation is active, run browser */
 	spawn_url(conf.browser,
 		  g_strdup_printf("http://%s:%d/users/%s/friends/",
@@ -96,46 +92,43 @@ wmlj_button_press(GtkWidget *widget, GdkEvent *event,
 
 static gboolean
 wmlj_animate_pixmap(GtkWidget* logo) {
-  /* gdk_threads_enter(); */
-
   pixmap_state++;
   if (pixmap_state >= 2) pixmap_state = 0;
 
   gtk_pixmap_set(GTK_PIXMAP(logo),
 		 datapix[pixmap_state], datamask[pixmap_state]);
 
-  /* gdk_threads_leave(); */
   return TRUE;
 }
 
 void wmlj_cf_timeout_add() {
-  if (cf_timeout_id)
+  if (wmlj.cf_timeout_id)
     return;
 
-  cf_timeout_id = gtk_timeout_add(conf.interval*1000,
-				  (GtkFunction)check_friends,
-				  NULL);
+  wmlj.cf_timeout_id = gtk_timeout_add(conf.interval*1000,
+				       (GtkFunction)check_friends,
+				       NULL);
 }
 
 void wmlj_cf_timeout_remove() {
-  if (cf_timeout_id) {
-    gtk_timeout_remove(cf_timeout_id);
-    cf_timeout_id = 0;
+  if (wmlj.cf_timeout_id) {
+    gtk_timeout_remove(wmlj.cf_timeout_id);
+    wmlj.cf_timeout_id = 0;
   }
 }
 
 void wmlj_anim_timeout_add() {
-  if (anim_timeout_id)
+  if (wmlj.anim_timeout_id)
     return;
 
-  anim_timeout_id = gtk_timeout_add(200, (GtkFunction)wmlj_animate_pixmap,
-				    logo);
+  wmlj.anim_timeout_id = gtk_timeout_add(200, (GtkFunction)wmlj_animate_pixmap,
+					 logo);
 }
 
 void wmlj_anim_timeout_remove() {
-  if (anim_timeout_id) {
-    gtk_timeout_remove(anim_timeout_id);
-    anim_timeout_id = 0;
+  if (wmlj.anim_timeout_id) {
+    gtk_timeout_remove(wmlj.anim_timeout_id);
+    wmlj.anim_timeout_id = 0;
   }
 }
   
@@ -175,32 +168,31 @@ wmlj_main_create(int argc, char *argv[]) {
 
 int main( int argc, char *argv[] ) {
 
-  GtkWidget *wmlj_main;
-
   g_thread_init(NULL);
 
-  pthread_mutex_init(&network_mut, NULL);
-
-  anim_timeout_id = cf_timeout_id = 0;
+  wmlj.network_mutex = PTHREAD_MUTEX_INITIALIZER;
+  wmlj.anim_timeout_id = 0;
+  wmlj.cf_timeout_id = 0;
 
   gtk_init(&argc, &argv);
 
-  wmlj_main = wmlj_main_create(argc, argv);
+  wmlj.win = wmlj_main_create(argc, argv);
 
-  gtk_widget_show(wmlj_main);
+  gtk_widget_show(wmlj.win);
 
   /* if first time run, show settings dialog */
   if (!rc_exists()) {
     /* read the configuration */
     rc_config_read(&conf);
     /* show settings dialog */
-    cmd_settings(wmlj_main, NULL);
+    cmd_settings(wmlj.win, NULL);
   }
   else {
     /* read the configuration */
     rc_config_read(&conf);
     /* perform a client login */
-    g_idle_add((GSourceFunc)login_check_friends_idle_cb, NULL);
+    pthread_create(&wmlj.network_thread, NULL,
+		   login_check_friends_thread, NULL);
   }
 
   gdk_threads_enter();
