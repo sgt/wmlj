@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.15 2002/02/06 13:46:03 sgt Exp $
+ * $Id: wmlj.c,v 1.16 2002/02/07 12:35:20 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -204,6 +204,8 @@ main( int argc, char *argv[] ) {
 
   gtk_widget_show(wmlj.win);
 
+  gdk_threads_enter();
+
   /* if first time run, show settings dialog */
   if (!rc_exists()) {
     /* read the configuration */
@@ -218,8 +220,8 @@ main( int argc, char *argv[] ) {
     network_exec_thread();
   }
 
-  gdk_threads_enter();
   gtk_main();
+
   gdk_threads_leave();
 
   /* save the configuration */
