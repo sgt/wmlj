@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.h,v 1.2 2002/01/06 13:45:08 sgt Exp $
+ * $Id: wmlj.h,v 1.3 2002/01/06 15:48:00 sgt Exp $
  */
 
 #ifndef WMLJ_WMLJ_H
@@ -16,7 +16,7 @@
 #define RC_FILE ".wmljrc"
 
 #define SERVER_PATH "/interface/flat"
-#define USERAGENT PACKAGE "-" VERSION
+#define USERAGENT "Gtk-WMLJ/" VERSION
 
 #define DEBUG 1
 

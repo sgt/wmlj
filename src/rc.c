@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: rc.c,v 1.6 2002/01/06 13:45:08 sgt Exp $
+ * $Id: rc.c,v 1.7 2002/01/06 15:48:00 sgt Exp $
  */
 
 #include <stdio.h>
@@ -79,6 +79,7 @@ static void
 rc_config_default(Config *conf) {
   conf->user = g_strdup("ljuser");
   conf->password = g_strdup("ljpass");
+  conf->use_fast = FALSE;
 
   conf->lj_server = g_strdup("www.livejournal.com");
   conf->lj_port = 80;
@@ -98,6 +99,7 @@ rc_config_dump(Config *conf) {
   fprintf(stderr, "=== Config dump ===\n");
   fprintf(stderr, "User: '%s'\n", conf->user);
   fprintf(stderr, "Password: '%s'\n", conf->password);
+  fprintf(stderr, "Use fast: '%d'\n", conf->use_fast);
   fprintf(stderr, "LJ server: '%s'\n", conf->lj_server);
   fprintf(stderr, "LJ port: '%d'\n", conf->lj_port);
   fprintf(stderr, "Use proxy: '%d'\n", conf->use_proxy);
@@ -151,6 +153,9 @@ rc_config_read(Config *conf) {
     else if (g_strcasecmp(option.key, "password") == 0) {
       conf->password = g_strdup(option.value);
     }
+    else if (g_strcasecmp(option.key, "usefast") == 0) {
+      conf->use_fast = atoi(option.value);
+    }
     else if (g_strcasecmp(option.key, "ljserver") == 0) {
       conf->lj_server = g_strdup(option.value);
     }
@@ -201,6 +206,10 @@ rc_config_write(Config *conf) {
 
   option.key = "Password";
   option.value = g_strdup(conf->password);
+  rc_option_write(f, &option);
+
+  option.key = "UseFast";
+  option.value = g_strdup_printf("%d", conf->use_fast);
   rc_option_write(f, &option);
 
   option.key = "LJServer";

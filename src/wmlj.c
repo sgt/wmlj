@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.6 2002/01/06 13:45:08 sgt Exp $
+ * $Id: wmlj.c,v 1.7 2002/01/06 15:48:00 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -194,9 +194,12 @@ int main( int argc, char *argv[] ) {
     /* show settings dialog */
     cmd_settings(wmlj_main, NULL);
   }
-  else
+  else {
     /* read the configuration */
     rc_config_read(&conf);
+    /* perform a client login */
+    lj_login();
+  }
 
   /* Timed events */
   wmlj_cf_timeout_add();

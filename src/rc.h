@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: rc.h,v 1.5 2002/01/06 13:45:08 sgt Exp $
+ * $Id: rc.h,v 1.6 2002/01/06 15:48:00 sgt Exp $
  */
 
 #ifndef WMLJ_RC_H
@@ -19,6 +19,7 @@ typedef struct {
 typedef struct {
   gchar *user;
   gchar *password;
+  gboolean use_fast; /* use fast server, paid users only */
 
   gchar *lj_server;
   gint lj_port;

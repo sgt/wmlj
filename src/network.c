@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.6 2002/01/06 13:45:08 sgt Exp $
+ * $Id: network.c,v 1.7 2002/01/06 15:48:00 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -14,6 +14,7 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
+#include "md5.h"
 #include "dlg.h"
 #include "network.h"
 #include "rc.h"
@@ -172,7 +173,11 @@ request_run(gchar *postfields) {
     /* self-promotion */
     curl_easy_setopt(req->curl, CURLOPT_USERAGENT, USERAGENT);
 
-    /* the data */
+    /* add a cookie for the fast server */
+    if (conf.use_fast)
+      curl_easy_setopt(req->curl, CURLOPT_COOKIE, "ljfastserver=1;");
+
+   /* the data */
     curl_easy_setopt(req->curl, CURLOPT_POSTFIELDS, postfields);
 
     /* be verbose for debugging purposes */
@@ -218,6 +223,35 @@ request_succeeded(GHashTable *result) {
   return (g_strcasecmp(success, "OK") == 0);
 }
 
+static void
+md5_hash(char *src, char *dest) {
+  struct MD5Context context;
+  unsigned char checksum[16];
+  int i;
+
+  MD5Init(&context);
+  MD5Update(&context, (const unsigned char*)src, strlen(src));
+  MD5Final(checksum, &context);
+  for (i = 0; i < 16; i++)
+    sprintf(&dest[i*2], "%02x", (unsigned int)checksum[i]);
+}
+
+static GString*
+lj_protocol_string_new(gchar *mode) {
+  GString *str;
+  char hpassword[33];
+
+  str = g_string_sized_new(64);
+
+  g_string_sprintfa(str, "user=%s&", conf.user);
+  /* g_string_sprintfa(str, "password=%s&", conf.password); */
+  md5_hash(conf.password, hpassword);
+  g_string_sprintfa(str, "hpassword=%s&", hpassword);
+  g_string_sprintfa(str, "mode=%s&", mode);
+
+  return str;
+}
+
 gboolean
 check_friends() {
   GHashTable *hash;
@@ -226,14 +260,10 @@ check_friends() {
 
   gdk_threads_enter();
 
-  req_str = g_string_sized_new(1024);
-
   if (cf.lastupdate == NULL)
     cf.lastupdate = g_strdup("");
 
-  g_string_sprintfa(req_str, "user=%s&", conf.user);
-  g_string_sprintfa(req_str, "password=%s&", conf.password);
-  g_string_sprintfa(req_str, "mode=%s&", "checkfriends");
+  req_str = lj_protocol_string_new("checkfriends");
   g_string_sprintfa(req_str, "lastupdate=%s&", cf.lastupdate);
 
   hash = request_run(req_str->str);
@@ -274,6 +304,46 @@ check_friends() {
     fprintf(stderr, "check_friends: new '%d'; last '%s'; interval '%s'\n",
 	    cf.new_messages, cf.lastupdate,
 	    (char*)g_hash_table_lookup(hash, "interval"));
+
+  hash_free(hash);
+
+  gdk_threads_leave();
+
+  return TRUE;
+}
+
+/* perform a client login */
+gboolean
+lj_login() {
+  GHashTable *hash;
+  GString *req_str;
+
+  gdk_threads_enter();
+
+  req_str = lj_protocol_string_new("login");
+  g_string_sprintfa(req_str, "clientversion=%s&", USERAGENT);
+  /* g_string_sprintfa(req_str, "getmenus=%d&", 1); */
+
+  hash = request_run(req_str->str);
+
+  g_string_free(req_str, TRUE);
+
+  if (!request_succeeded(hash)) {
+    if (DEBUG)
+      fprintf(stderr, "lj_login: Request failed.\n");
+
+    if (g_hash_table_lookup(hash, "http-error") == NULL)
+      network_error("Login failed. "
+		    "Please review your login information.");
+
+    return FALSE;
+  }
+
+  /* check if we can use the fast server */
+  conf.use_fast = (atoi(g_hash_table_lookup(hash, "fastserver")) != 0);
+
+  /* add the web links */
+  /* wmlj_menu_add_web(hash); */
 
   hash_free(hash);
 

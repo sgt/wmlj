@@ -3,30 +3,42 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: settings.c,v 1.5 2002/01/06 13:45:08 sgt Exp $
+ * $Id: settings.c,v 1.6 2002/01/06 15:48:00 sgt Exp $
  */
 
+#include <string.h>
 #include <stdlib.h>
 
 #include "config.h"
 #include "dlg.h"
 #include "rc.h"
 #include "settings.h"
+#include "network.h"
 #include "wmlj.h"
 
 static Config newconf;
 
 static void
 ok_cb(GtkWidget *widget, GtkWidget *dialog) {
-  /* adjust the update interval */
+  gboolean login_changed, interval_changed;
+
+  login_changed = ((strcmp(conf.user, newconf.user) != 0)||
+		   (strcmp(conf.password, newconf.password) != 0));
+  interval_changed = conf.interval != newconf.interval;
 
   memcpy(&conf, &newconf, sizeof(Config));
 
   rc_config_write(&conf);
 
+  /* relogin */
+  if (login_changed)
+    lj_login();
+
   /* adjust the update interval */
-  wmlj_cf_timeout_remove();
-  wmlj_cf_timeout_add();
+  if (login_changed || interval_changed) {
+    wmlj_cf_timeout_remove();
+    wmlj_cf_timeout_add();
+  }
 
   gtk_widget_destroy(dialog);
 }
@@ -49,43 +61,60 @@ settings_account() {
 
     frame = gtk_frame_new("LJ user"); {
 
-      GtkWidget *hbox;
+      GtkWidget *vbox;
 
-      hbox = gtk_hbox_new(FALSE, 5); {
+      vbox = gtk_vbox_new(FALSE, 5); {
 
-	GtkWidget *user, *password, *label;
+	GtkWidget *hbox, *fast_cb;
 
-	gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
+	gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
 
-	label = gtk_label_new("User:");
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	hbox = gtk_hbox_new(FALSE, 5); {
 
-	user = dlg_entry_new_with_text(newconf.user);
-	gtk_widget_set_usize(user,
-			     gdk_string_width(user->style->font,
-					      "abrakadabra"), -1);
-	gtk_box_pack_start(GTK_BOX(hbox), user, TRUE, TRUE, 0);
+	  GtkWidget *user, *password, *label;
 
-	label = gtk_label_new("Password:");
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	  gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
 
-	password = dlg_entry_new_with_text(newconf.password);
-	/* conceal the password, show the Mysterious Asterisks! yay! */
-	gtk_entry_set_visibility(GTK_ENTRY(password), FALSE);
-	gtk_widget_set_usize(password,
-			     gdk_string_width(password->style->font,
-					      "abrakadabra"), -1);
-	gtk_box_pack_start(GTK_BOX(hbox), password, TRUE, TRUE, 0);
+	  label = gtk_label_new("User:");
+	  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
-	gtk_signal_connect(GTK_OBJECT(user), "changed",
-			   GTK_SIGNAL_FUNC(dlg_entry_str_cb),
-			   &newconf.user);
-	gtk_signal_connect(GTK_OBJECT(password), "changed",
-			   GTK_SIGNAL_FUNC(dlg_entry_str_cb),
-			   &newconf.password);
+	  user = dlg_entry_new_with_text(newconf.user);
+	  gtk_widget_set_usize(user,
+			       gdk_string_width(user->style->font,
+						"abrakadabra"), -1);
+	  gtk_box_pack_start(GTK_BOX(hbox), user, TRUE, TRUE, 0);
+
+	  label = gtk_label_new("Password:");
+	  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	  password = dlg_entry_new_with_text(newconf.password);
+	  /* conceal the password, show the Mysterious Asterisks! yay! */
+	  gtk_entry_set_visibility(GTK_ENTRY(password), FALSE);
+	  gtk_widget_set_usize(password,
+			       gdk_string_width(password->style->font,
+						"abrakadabra"), -1);
+	  gtk_box_pack_start(GTK_BOX(hbox), password, TRUE, TRUE, 0);
+
+	  gtk_signal_connect(GTK_OBJECT(user), "changed",
+			     GTK_SIGNAL_FUNC(dlg_entry_str_cb),
+			     &newconf.user);
+	  gtk_signal_connect(GTK_OBJECT(password), "changed",
+			     GTK_SIGNAL_FUNC(dlg_entry_str_cb),
+			     &newconf.password);
+	}
+
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+
+	fast_cb = gtk_check_button_new_with_label("Use fast server "
+						"(paid users only)");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fast_cb),
+				     newconf.use_fast);
+	gtk_box_pack_start(GTK_BOX(vbox), fast_cb, FALSE, FALSE, 0);
+
+	gtk_signal_connect(GTK_OBJECT(fast_cb), "toggled",
+			   GTK_SIGNAL_FUNC(dlg_toggle_cb), &newconf.use_fast);
       }
-
-      gtk_container_add(GTK_CONTAINER(frame), hbox);
+      gtk_container_add(GTK_CONTAINER(frame), vbox);
     }
 
     gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 0);
