@@ -3,9 +3,10 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.8 2002/01/08 17:03:03 sgt Exp $
+ * $Id: network.c,v 1.9 2002/01/08 17:06:58 sgt Exp $
  */
 
+#include <string.h>
 #include <stdlib.h>
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -33,6 +34,7 @@ static void
 network_error(gchar *msg) {
   GtkWidget *dialog, *vbox;
 
+  gdk_threads_enter();
   dialog = dlg_new(NULL, "wmlj network error");
 
   vbox = gtk_vbox_new(FALSE, 5); {
@@ -49,6 +51,8 @@ network_error(gchar *msg) {
   dlg_set_contents(dialog, vbox);
   dlg_add_close(dialog, NULL);
   gtk_widget_show(dialog);
+
+  gdk_threads_leave();
 }
 
 static size_t curlwrite(void *ptr, size_t size, size_t nmemb, void *stream) {
