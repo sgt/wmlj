@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: network.c,v 1.4 2002/01/06 00:57:17 sgt Exp $
+ * $Id: network.c,v 1.5 2002/01/06 13:25:10 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -98,7 +98,7 @@ static GHashTable*
 hash_curl_error() {
   GHashTable *hash = g_hash_table_new(g_str_hash, g_str_equal);
 
-  g_hash_table_insert(hash, "curl", "error");
+  g_hash_table_insert(hash, "http-error", "error");
 
   return hash;
 }
@@ -244,7 +244,7 @@ check_friends() {
     if (DEBUG)
       fprintf(stderr, "check_friends: Request failed.\n");
 
-    if (g_hash_table_lookup(hash, "curl") != NULL)
+    if (g_hash_table_lookup(hash, "http-error") == NULL)
       network_error("Friendlist check failed. "
 		    "Please review your login information.");
 
