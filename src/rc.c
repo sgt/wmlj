@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: rc.c,v 1.2 2002/01/05 17:42:24 sgt Exp $
+ * $Id: rc.c,v 1.3 2002/01/05 22:49:46 sgt Exp $
  */
 
 #include <stdio.h>
@@ -90,6 +90,7 @@ rc_config_default(Config *conf) {
   conf->interval = 300;
 
   conf->browser = g_strdup("netscape-remote -remote %s");
+  conf->lj_client = g_strdup("logjam");
 }
 
 void
@@ -104,6 +105,7 @@ rc_config_dump(Config *conf) {
   fprintf(stderr, "Proxy port: '%d'\n", conf->proxy_port);
   fprintf(stderr, "Interval: '%d'\n", conf->interval);
   fprintf(stderr, "Browser: '%s'\n", conf->browser);
+  fprintf(stderr, "LJ client: '%s'\n", conf->lj_client);
   fprintf(stderr, "\n");
 }
 
@@ -157,6 +159,10 @@ rc_config_read(Config *conf) {
     else if (g_strcasecmp(option.key, "browser") == 0) {
       conf->browser = g_strdup(option.value);
     }
+    else if (g_strcasecmp(option.key, "ljclient") == 0) {
+      conf->lj_client = g_strdup(option.value);
+    }
+
     /* otherwise, ignore the line */
   }
 
@@ -210,6 +216,10 @@ rc_config_write(Config *conf) {
 
   option.key = "Browser";
   option.value = g_strdup(conf->browser);
+  rc_option_write(f, &option);
+
+  option.key = "LJClient";
+  option.value = g_strdup(conf->lj_client);
   rc_option_write(f, &option);
 
   fclose(f);

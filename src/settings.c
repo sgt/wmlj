@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: settings.c,v 1.2 2002/01/05 17:42:24 sgt Exp $
+ * $Id: settings.c,v 1.3 2002/01/05 22:49:46 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -189,33 +189,73 @@ settings_connection() {
 }
 
 static GtkWidget*
-settings_browser() {
+settings_programs() {
   /* XXX should check if command has one and only %s! */
   GtkWidget *vbox;
 
   vbox = gtk_vbox_new(FALSE, 10); {
-    GtkWidget *desc_l, *cmd_l, *cmd_e;
+    GtkWidget *frame, *desc_l;
 
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
 
-    desc_l = gtk_label_new("This command will be evaluated by /bin/sh.\n"
-			   "Use %s in the command line in the place of the "
-			   "URL.");
+    desc_l = gtk_label_new("These commands will be evaluated by /bin/sh.");
     gtk_misc_set_alignment(GTK_MISC(desc_l), 0, 0.5);
     gtk_label_set_justify(GTK_LABEL(desc_l), GTK_JUSTIFY_LEFT);
     gtk_box_pack_start(GTK_BOX(vbox), desc_l, FALSE, FALSE, 0);
 
-    cmd_l = gtk_label_new("Command:");
-    gtk_misc_set_alignment(GTK_MISC(cmd_l), 0, 0.5);
-    gtk_label_set_justify(GTK_LABEL(cmd_l), GTK_JUSTIFY_LEFT);
-    gtk_box_pack_start(GTK_BOX(vbox), cmd_l, FALSE, FALSE, 0);
+    frame = gtk_frame_new("Web browser"); {
+      GtkWidget *frame_box;
 
-    cmd_e = dlg_entry_new_with_text(g_strdup(newconf.browser));
-    gtk_box_pack_start(GTK_BOX(vbox), cmd_e, FALSE, FALSE, 0);
+      frame_box = gtk_vbox_new(FALSE, 5); {
+	GtkWidget *desc_l, *cmd_l, *cmd_e;
 
-    gtk_signal_connect(GTK_OBJECT(cmd_e), "changed",
-		       GTK_SIGNAL_FUNC(dlg_entry_str_cb),
-		       &newconf.browser);
+	gtk_container_set_border_width(GTK_CONTAINER(frame_box), 5);
+
+	desc_l = gtk_label_new("Use %s in the command line in the place of "
+			       "the URL.");
+	gtk_misc_set_alignment(GTK_MISC(desc_l), 0, 0.5);
+	gtk_label_set_justify(GTK_LABEL(desc_l), GTK_JUSTIFY_LEFT);
+	gtk_box_pack_start(GTK_BOX(frame_box), desc_l, FALSE, FALSE, 0);
+
+	cmd_l = gtk_label_new("Command:");
+	gtk_misc_set_alignment(GTK_MISC(cmd_l), 0, 0.5);
+	gtk_label_set_justify(GTK_LABEL(cmd_l), GTK_JUSTIFY_LEFT);
+	gtk_box_pack_start(GTK_BOX(frame_box), cmd_l, FALSE, FALSE, 0);
+
+	cmd_e = dlg_entry_new_with_text(g_strdup(newconf.browser));
+	gtk_box_pack_start(GTK_BOX(frame_box), cmd_e, FALSE, FALSE, 0);
+
+	gtk_signal_connect(GTK_OBJECT(cmd_e), "changed",
+			   GTK_SIGNAL_FUNC(dlg_entry_str_cb),
+			   &newconf.browser);
+      }
+      gtk_container_add(GTK_CONTAINER(frame), frame_box);
+    }
+    gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 0);
+
+    frame = gtk_frame_new("LJ client"); {
+      GtkWidget *frame_box;
+
+      frame_box = gtk_vbox_new(FALSE, 5); {
+	GtkWidget *cmd_l, *cmd_e;
+
+	gtk_container_set_border_width(GTK_CONTAINER(frame_box), 5);
+
+	cmd_l = gtk_label_new("Command:");
+	gtk_misc_set_alignment(GTK_MISC(cmd_l), 0, 0.5);
+	gtk_label_set_justify(GTK_LABEL(cmd_l), GTK_JUSTIFY_LEFT);
+	gtk_box_pack_start(GTK_BOX(frame_box), cmd_l, FALSE, FALSE, 0);
+
+	cmd_e = dlg_entry_new_with_text(g_strdup(newconf.lj_client));
+	gtk_box_pack_start(GTK_BOX(frame_box), cmd_e, FALSE, FALSE, 0);
+
+	gtk_signal_connect(GTK_OBJECT(cmd_e), "changed",
+			   GTK_SIGNAL_FUNC(dlg_entry_str_cb),
+			   &newconf.lj_client);
+      }
+      gtk_container_add(GTK_CONTAINER(frame), frame_box);
+    }
+    gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 0);
   }
 
   return vbox;
@@ -244,8 +284,8 @@ cmd_settings(GtkWidget *parent, GdkEvent *event) {
 			     settings_connection(),
 			     gtk_label_new("Connection"));
     gtk_notebook_append_page(GTK_NOTEBOOK(nb),
-			     settings_browser(),
-			     gtk_label_new("Web browser"));
+			     settings_programs(),
+			     gtk_label_new("Programs"));
 
     dlg_set_contents(dialog, nb);
   }

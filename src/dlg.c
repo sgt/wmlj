@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: dlg.c,v 1.1 2002/01/05 15:31:17 sgt Exp $
+ * $Id: dlg.c,v 1.2 2002/01/05 22:49:46 sgt Exp $
  */
 
 /* large portions of this code was adopted from LoserJabber (see README) */
@@ -90,8 +90,7 @@ dlg_toggle_cb(GtkWidget *button, gboolean *b) {
 
 void
 dlg_entry_str_cb(GtkWidget *entry, gchar **str) {
-  /* XXX g_strdup needed? */
-  *str = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
+  *str = gtk_entry_get_text(GTK_ENTRY(entry));
 }
 
 void

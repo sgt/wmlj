@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: wmlj.c,v 1.2 2002/01/05 17:42:24 sgt Exp $
+ * $Id: wmlj.c,v 1.3 2002/01/05 22:49:46 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -66,17 +66,25 @@ wmlj_button_press(GtkWidget *widget, GdkEvent *event,
     switch (event->button.button) {
     case 1:
       /* left button double-click */
-      spawn_url(conf.browser,
-		g_strdup_printf("http://%s:%d/users/%s/friends/",
-				conf.lj_server,
-				conf.lj_port,
-				conf.user));
+      if (anim_timeout_id) {
+	/* animation is active, run browser */
+	spawn_url(conf.browser,
+		  g_strdup_printf("http://%s:%d/users/%s/friends/",
+				  conf.lj_server,
+				  conf.lj_port,
+				  conf.user));
 
-      /* reset the monitor */
-      cf.lastupdate = g_strdup("");
-      wmlj_anim_timeout_remove();
+	/* reset the monitor */
+	cf.lastupdate = g_strdup("");
+	wmlj_anim_timeout_remove(); /* stop the animation */
+	wmlj_cf_timeout_add();      /* resume polling */
 
-      return FALSE;
+	return FALSE;
+      }
+      else {
+	/* animation is inactive, run LJ client */
+	spawn_app(conf.lj_client);
+      }
     default:
       return FALSE;
     }

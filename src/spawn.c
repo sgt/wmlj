@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: spawn.c,v 1.1 2002/01/05 17:42:24 sgt Exp $
+ * $Id: spawn.c,v 1.2 2002/01/05 22:49:46 sgt Exp $
  */
 
 #include <stdio.h>
@@ -14,7 +14,8 @@
 #include "spawn.h"
 #include "wmlj.h"
 
-int spawn_cmd(gchar *cmd) {
+static int
+spawn_cmd(gchar *cmd) {
   gchar *argv[5];
 
   if (DEBUG)
@@ -28,7 +29,8 @@ int spawn_cmd(gchar *cmd) {
   return execv("/bin/sh", argv);
 }
 
-void spawn_url(gchar *command, gchar *url) {
+void
+spawn_app(gchar *command) {
   pid_t pid;
 
   if (command == NULL)
@@ -41,15 +43,20 @@ void spawn_url(gchar *command, gchar *url) {
     return;
   }
   else if (pid == 0) { /* child */
-    gchar *cmd;
-
-    cmd = g_strdup_printf(command, url);
-  
-    if (spawn_cmd(cmd) < 0) {
+    if (spawn_cmd(command) < 0) {
       perror("exec");
     }
 
     /* never gets here, unless /bin/sh is bad. */
     _exit(0);
   }
+}
+
+void
+spawn_url(gchar *command, gchar *url) {
+  gchar *cmd;
+
+  cmd = g_strdup_printf(command, url);
+
+  spawn_app(cmd);
 }

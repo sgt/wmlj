@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: network.c,v 1.2 2002/01/05 17:42:24 sgt Exp $
+ * $Id: network.c,v 1.3 2002/01/05 22:49:46 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -95,6 +95,15 @@ hash_free(GHashTable *hash) {
 }
 
 static GHashTable*
+hash_curl_error() {
+  GHashTable *hash = g_hash_table_new(g_str_hash, g_str_equal);
+
+  g_hash_table_insert(hash, "curl", "error");
+
+  return hash;
+}
+
+static GHashTable*
 parse_response(char *buf) {
   char *key, *val;
   GHashTable *hash = g_hash_table_new(g_str_hash, g_str_equal);
@@ -172,12 +181,14 @@ request_run(gchar *postfields) {
 
     if (req->res != CURLE_OK) {
       network_error(errorbuf);
+      hash = hash_curl_error();
+    }
+    else {
+       hash = parse_response(req->buf->str);
     }
 
     /* always cleanup */
     curl_easy_cleanup(req->curl);
-
-    hash = parse_response(req->buf->str);
 
     g_string_free(req->buf, TRUE);
 
@@ -227,8 +238,9 @@ check_friends() {
     if (DEBUG)
       fprintf(stderr, "check_friends: Request failed.\n");
 
-    network_error("Friendlist check failed. "
-		  "Please review your login information.");
+    if (g_strcasecmp(g_hash_table_lookup(hash, "curl"), "error"))
+      network_error("Friendlist check failed. "
+		    "Please review your login information.");
 
     return FALSE;
   }
@@ -244,11 +256,13 @@ check_friends() {
 
   /* adjust the interval in case it has been changed */
   wmlj_cf_timeout_remove();
-  wmlj_cf_timeout_add();
 
   /* if there are new messages, let's start the animation */
   if (cf.new_messages > 0)
     wmlj_anim_timeout_add();
+  else
+    /* resume polling (possibly, with adjusted interval) */
+    wmlj_cf_timeout_add();
 
   if (DEBUG)
     fprintf(stderr, "check_friends: new '%d'; last '%s'; interval '%s'\n",

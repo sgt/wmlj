@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: rc.h,v 1.2 2002/01/05 17:42:24 sgt Exp $
+ * $Id: rc.h,v 1.3 2002/01/05 22:49:46 sgt Exp $
  */
 
 #ifndef WMLJ_RC_H
@@ -30,7 +30,9 @@ typedef struct {
   /* server check interval */
   gint interval;
 
+  /* programs to spawn */
   gchar *browser;
+  gchar *lj_client;
 } Config;
 
 /* The config file structure */
