@@ -3,7 +3,7 @@
  *
  * (c) 2001, Sergei Barbarash <sgt@outline.ru>
  *
- * $Id: wmlj.c,v 1.3 2002/01/05 22:49:46 sgt Exp $
+ * $Id: wmlj.c,v 1.4 2002/01/05 23:09:55 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -52,10 +52,9 @@ wmlj_button_press(GtkWidget *widget, GdkEvent *event,
     switch (event->button.button) {
     case 2:
       /* middle button click */
-      if (DEBUG) {
+      if (DEBUG)
 	rc_config_dump(&conf);
-	return FALSE;
-      }
+      return FALSE;
     case 3:
       /* right button click */
       return wmlj_menu_popup(widget, event, callback_data);
