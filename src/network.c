@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.16 2002/02/07 16:35:27 sgt Exp $
+ * $Id: network.c,v 1.17 2002/02/08 18:05:37 sgt Exp $
  */
 
 #include <time.h>
@@ -51,7 +51,8 @@ network_error(gchar *msg) {
   gtk_widget_show(dialog);
 }
 
-static size_t curlwrite(void *ptr, size_t size, size_t nmemb, void *stream) {
+static
+size_t curlwrite(void *ptr, size_t size, size_t nmemb, void *stream) {
   Request *req = stream;
 
   g_string_append(req->buf, ptr);
@@ -259,6 +260,7 @@ check_friends() {
   GHashTable *hash;
   GString *req_str;
   gint ok_interval;
+  gpointer data;
 
   if (wmlj.cf.lastupdate == NULL)
     wmlj.cf.lastupdate = g_strdup("");
@@ -282,14 +284,23 @@ check_friends() {
     return FALSE;
   }
 
-  wmlj.cf.lastupdate = g_strdup(g_hash_table_lookup(hash, "lastupdate"));
-  wmlj.cf.new_messages = atoi(g_hash_table_lookup(hash, "new"));
+  if ((data = g_hash_table_lookup(hash, "lastupdate"))!= NULL)
+    wmlj.cf.lastupdate = g_strdup(data);
+  else
+    wmlj.cf.lastupdate = g_strdup("");
+
+  if ((data = g_hash_table_lookup(hash, "new")) != NULL)
+    wmlj.cf.new_messages = atoi(data);
+  else
+    wmlj.cf.new_messages = 0;
 
   /* interval shouldn't be less than one that's required by the server */
-  ok_interval = MAX(conf.interval,
-		    atoi(g_hash_table_lookup(hash, "interval")));
-  if (conf.interval < ok_interval)
-    conf.interval = ok_interval;
+  if ((data = g_hash_table_lookup(hash, "interval")) != NULL) {
+    ok_interval = MAX(conf.interval, atoi(data));
+
+    if (conf.interval < ok_interval)
+      conf.interval = ok_interval;
+  }
 
   /* adjust the interval in case it has been changed */
   wmlj_cf_timeout_remove();

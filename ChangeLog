@@ -1,3 +1,15 @@
+2002-02-08  Sergei Barbarash  <sgt@livejournal.com>
+
+	* Release 0.3.2
+	* Fixed a bug with non-paid users (thanks to Fima Skepner)
+	* Added sanity check to values passed by LJ protocol
+
+2002-02-07  Sergei Barbarash  <sgt@livejournal.com>
+
+	* Release 0.3.1
+	* Fixed some threading issues appearing on Linux
+		(earlier gdk_threads_enter())
+
 2002-02-06  Sergei Barbarash  <sgt@livejournal.com>
 
 	* Release 0.3

@@ -3,3 +3,4 @@
  - perform a valid LJ login (with menus and stuff)
  - draw a nicer animation
  - lastupdate should change to now when the icon is double-clicked
+ - indicate broken link state (change icon to b&w)
