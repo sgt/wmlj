@@ -1,3 +1,10 @@
+2002-05-24  Sergei Barbarash  <sgt@fep.ru>
+
+	* Release 0.4.0
+	* Fixed a bug with request URL
+	* Fixed fucked-up animation start
+	* Added a "disabled" icon to alert the user in case of network errors
+
 2002-02-08  Sergei Barbarash  <sgt@livejournal.com>
 
 	* Release 0.3.2

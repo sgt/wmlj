@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.h,v 1.6 2002/02/06 13:46:03 sgt Exp $
+ * $Id: wmlj.h,v 1.7 2002/05/24 13:28:30 sgt Exp $
  */
 
 #ifndef WMLJ_WMLJ_H
@@ -46,11 +46,11 @@ typedef struct {
 
   pthread_t network_thread;
   pthread_mutex_t network_mutex;
-  pthread_mutex_t network_error_mutex; /* if locked, there are net errors */
 
   CheckFriends cf;
 
   gint pixmap_state;
+  gboolean network_state;
 
   GdkPixmap *datapix[LOGO_ANIM_START+2];
   GdkBitmap *datamask[LOGO_ANIM_START+2];
@@ -64,5 +64,6 @@ extern void wmlj_cf_timeout_add();
 extern void wmlj_cf_timeout_remove();
 extern void wmlj_anim_timeout_add();
 extern void wmlj_anim_timeout_remove();
+extern void wmlj_activate(gboolean state);
 
 #endif /* WMLJ_WMLJ_H */

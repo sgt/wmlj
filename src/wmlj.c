@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.16 2002/02/07 12:35:20 sgt Exp $
+ * $Id: wmlj.c,v 1.17 2002/05/24 13:28:30 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -24,10 +24,11 @@
 #include "wmlj.h"
 #include "config.h"
 
-static gint pixmap_state = 0;
-
 Wmlj wmlj;
 
+/*
+ * Sets a new pixmap in wmlj window
+ */
 void
 wmlj_pixmap_set(IconType icon) {
   gtk_pixmap_set((GtkPixmap*)wmlj.logo,
@@ -93,17 +94,23 @@ wmlj_button_press(GtkWidget *widget, GdkEvent *event,
   }
 }
 
+/*
+ * Timer callback, shows the next animation frame
+ */
 static gboolean
 wmlj_animate_pixmap(GtkWidget* logo) {
-  pixmap_state++;
-  if (pixmap_state >= LOGO_ANIM_START+2)
-    pixmap_state = LOGO_ANIM_START;
+  wmlj.pixmap_state++;
+  if (wmlj.pixmap_state >= LOGO_ANIM_START+2)
+    wmlj.pixmap_state = LOGO_ANIM_START;
 
-  wmlj_pixmap_set(pixmap_state);
+  wmlj_pixmap_set(wmlj.pixmap_state);
 
   return TRUE;
 }
 
+/*
+ * Adds the "check friends" timeout
+ */
 void
 wmlj_cf_timeout_add() {
   if (wmlj.cf_timeout_id)
@@ -114,6 +121,9 @@ wmlj_cf_timeout_add() {
 				       NULL);
 }
 
+/*
+ * Removes the "check friends" timeout
+ */
 void
 wmlj_cf_timeout_remove() {
   if (wmlj.cf_timeout_id) {
@@ -122,6 +132,9 @@ wmlj_cf_timeout_remove() {
   }
 }
 
+/*
+ * Adds the animation timeout
+ */
 void
 wmlj_anim_timeout_add() {
   if (wmlj.anim_timeout_id)
@@ -131,14 +144,35 @@ wmlj_anim_timeout_add() {
 					 wmlj.logo);
 }
 
+/*
+ * Removes the animation timeout
+ */
 void
 wmlj_anim_timeout_remove() {
   if (wmlj.anim_timeout_id) {
     gtk_timeout_remove(wmlj.anim_timeout_id);
     wmlj.anim_timeout_id = 0;
   }
+
+  /* return the original static logo */
+  wmlj_pixmap_set(LOGO_MAIN);
 }
 
+/*
+ * Switches "active/inactive" app states
+ */
+void
+wmlj_activate(gboolean state) {
+  wmlj.network_state = state;
+  if (state)
+    wmlj_pixmap_set(LOGO_MAIN);
+  else
+    wmlj_pixmap_set(LOGO_BW);
+}
+
+/*
+ * Initiates required bitmaps
+ */
 static void
 wmlj_pixmaps_create(GdkWindow *win) {
   wmlj.datapix[LOGO_MAIN] = \
@@ -156,7 +190,7 @@ wmlj_pixmaps_create(GdkWindow *win) {
 }
 
 /*
- * Creating the main window with logo pixmap
+ * Creates the main window with logo pixmap
  */
 static GtkWidget*
 wmlj_main_create(int argc, char *argv[]) {
@@ -193,10 +227,10 @@ main( int argc, char *argv[] ) {
   g_thread_init(NULL);
 
   pthread_mutex_init(&wmlj.network_mutex, NULL);
-  pthread_mutex_init(&wmlj.network_error_mutex, NULL);
   wmlj.anim_timeout_id = 0;
   wmlj.cf_timeout_id = 0;
-  wmlj.pixmap_state = 0;
+  wmlj.pixmap_state = LOGO_ANIM_START;
+  wmlj.network_state = 1;
 
   gtk_init(&argc, &argv);
 

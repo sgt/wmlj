@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.17 2002/02/08 18:05:37 sgt Exp $
+ * $Id: network.c,v 1.18 2002/05/24 13:28:30 sgt Exp $
  */
 
 #include <time.h>
@@ -154,7 +154,7 @@ request_run(gchar *postfields) {
 
     /* specify server URL */
     url = g_string_sized_new(64);
-    g_string_sprintf(url, "http://%s:%d/%s", conf.lj_server, conf.lj_port,
+    g_string_sprintf(url, "http://%s:%d%s", conf.lj_server, conf.lj_port,
 		     SERVER_PATH);
     curl_easy_setopt(req->curl, CURLOPT_URL, url->str);
 
@@ -281,6 +281,9 @@ check_friends() {
 		    "Please review your login information.");
     }
 
+    if (wmlj.network_state)
+      wmlj_activate(FALSE);
+
     return FALSE;
   }
 
@@ -319,6 +322,8 @@ check_friends() {
 
   hash_free(hash);
 
+  if (! wmlj.network_state)
+    wmlj_activate(TRUE);
   return TRUE;
 }
 
