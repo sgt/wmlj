@@ -1,9 +1,15 @@
+2002-02-06  Sergei Barbarash  <sgt@livejournal.com>
+
+	* Release 0.3
+	* many bugfixes in threading etc
+	* works pretty stable on Linux and FreeBSD
+
 2002-01-06  Sergei Barbarash  <sgt@livejournal.com>
 
 	* now makes net connections in a separate thread, with mutex locking
 	* added an initial check_friends()
 
-2002-01-06  Sergei Barbarash  <sgt@fep.ru>
+2002-01-06  Sergei Barbarash  <sgt@livejournal.com>
 
 	* Release 0.2
 	* added valid LJ login, not much is used yet
@@ -14,7 +20,7 @@
 	* if no .wmljrc found, pops up the settings dialog immediately
 	* network error notification now works properly
 
-2002-01-05  Sergei Barbarash  <sgt@fep.ru>
+2002-01-05  Sergei Barbarash  <sgt@livejournal.com>
 
 	* Release 0.1
 	* Initial release
