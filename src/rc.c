@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: rc.c,v 1.8 2002/01/08 10:19:36 sgt Exp $
+ * $Id: rc.c,v 1.9 2002/01/08 17:03:03 sgt Exp $
  */
 
 #include <stdio.h>
@@ -91,7 +91,7 @@ rc_config_default(Config *conf) {
   conf->interval = 300;
 
   conf->browser = g_strdup("netscape-remote -remote %s");
-  conf->lj_client = g_strdup("logjam");
+  conf->lj_client = g_strdup("logjam&");
 }
 
 void

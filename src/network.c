@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.7 2002/01/06 15:48:00 sgt Exp $
+ * $Id: network.c,v 1.8 2002/01/08 17:03:03 sgt Exp $
  */
 
 #include <stdlib.h>
@@ -13,6 +13,8 @@
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
+
+#include <pthread.h>
 
 #include "md5.h"
 #include "dlg.h"
@@ -133,12 +135,22 @@ parse_response(char *buf) {
   return hash;
 }
 
+static void *
+curl_thread(void *data) {
+  Request *req = data;
+
+  req->res = curl_easy_perform(req->curl);
+  gtk_main_quit();
+  return NULL;
+}
+
 static GHashTable*
 request_run(gchar *postfields) {
   Request *req;
   GString *url;
   GHashTable *hash;
   gchar errorbuf[CURL_ERROR_SIZE];
+  pthread_t threadid;
 
   req = g_new0(Request, 1);
 
@@ -188,7 +200,9 @@ request_run(gchar *postfields) {
     curl_easy_setopt(req->curl, CURLOPT_ERRORBUFFER, errorbuf);
 
     /* do the magic */
-    req->res = curl_easy_perform(req->curl);
+    /* req->res = curl_easy_perform(req->curl); */
+    pthread_create(&threadid, NULL, curl_thread, req);
+    gtk_main();
 
     if (req->res != CURLE_OK) {
       network_error(errorbuf);
@@ -258,8 +272,6 @@ check_friends() {
   GString *req_str;
   gint ok_interval;
 
-  gdk_threads_enter();
-
   if (cf.lastupdate == NULL)
     cf.lastupdate = g_strdup("");
 
@@ -307,8 +319,6 @@ check_friends() {
 
   hash_free(hash);
 
-  gdk_threads_leave();
-
   return TRUE;
 }
 
@@ -317,8 +327,6 @@ gboolean
 lj_login() {
   GHashTable *hash;
   GString *req_str;
-
-  gdk_threads_enter();
 
   req_str = lj_protocol_string_new("login");
   g_string_sprintfa(req_str, "clientversion=%s&", USERAGENT);
@@ -346,8 +354,6 @@ lj_login() {
   /* wmlj_menu_add_web(hash); */
 
   hash_free(hash);
-
-  gdk_threads_leave();
 
   return TRUE;
 }

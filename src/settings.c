@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: settings.c,v 1.6 2002/01/06 15:48:00 sgt Exp $
+ * $Id: settings.c,v 1.7 2002/01/08 17:03:03 sgt Exp $
  */
 
 #include <string.h>
@@ -30,6 +30,8 @@ ok_cb(GtkWidget *widget, GtkWidget *dialog) {
 
   rc_config_write(&conf);
 
+  gtk_widget_destroy(dialog);
+
   /* relogin */
   if (login_changed)
     lj_login();
@@ -40,7 +42,6 @@ ok_cb(GtkWidget *widget, GtkWidget *dialog) {
     wmlj_cf_timeout_add();
   }
 
-  gtk_widget_destroy(dialog);
 }
 
 static void

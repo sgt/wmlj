@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.8 2002/01/08 10:19:36 sgt Exp $
+ * $Id: wmlj.c,v 1.9 2002/01/08 17:03:03 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -94,7 +94,7 @@ wmlj_button_press(GtkWidget *widget, GdkEvent *event,
 
 static gboolean
 wmlj_animate_pixmap(GtkWidget* logo) {
-  gdk_threads_enter();
+  /* gdk_threads_enter(); */
 
   pixmap_state++;
   if (pixmap_state >= 2) pixmap_state = 0;
@@ -102,7 +102,7 @@ wmlj_animate_pixmap(GtkWidget* logo) {
   gtk_pixmap_set(GTK_PIXMAP(logo),
 		 datapix[pixmap_state], datamask[pixmap_state]);
 
-  gdk_threads_leave();
+  /* gdk_threads_leave(); */
   return TRUE;
 }
 
@@ -185,8 +185,6 @@ int main( int argc, char *argv[] ) {
 
   gtk_widget_show(wmlj_main);
 
-  gdk_threads_enter();
-
   /* if first time run, show settings dialog */
   if (!rc_exists()) {
     /* read the configuration */
@@ -207,6 +205,7 @@ int main( int argc, char *argv[] ) {
   /* Timed events */
   wmlj_cf_timeout_add();
 
+  gdk_threads_enter();
   gtk_main();
   gdk_threads_leave();
 
