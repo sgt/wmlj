@@ -1,9 +1,9 @@
 /*
  * wmlj - a LiveJournal dockapp
  *
- * (c) 2001, Sergei Barbarash <sgt@outline.ru>
+ * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: about.c,v 1.1 2002/01/05 15:31:17 sgt Exp $
+ * $Id: about.c,v 1.2 2002/01/06 13:45:08 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -24,7 +24,7 @@ cmd_about(GtkWidget *parent, GdkEvent *event) {
 
     label = gtk_label_new(PACKAGE "-" VERSION "\n"
 			  "A LiveJournal Monitor\n"
-			  "(c) 2001, Sergei Barbarash <sgt@outline.ru>");
+			  "(c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>");
 
     gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, FALSE, 0);
   }

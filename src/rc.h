@@ -1,9 +1,9 @@
 /*
  * wmlj - a LiveJournal dockapp
  *
- * (c) 2001, Sergei Barbarash <sgt@outline.ru>
+ * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: rc.h,v 1.4 2002/01/06 13:26:04 sgt Exp $
+ * $Id: rc.h,v 1.5 2002/01/06 13:45:08 sgt Exp $
  */
 
 #ifndef WMLJ_RC_H

@@ -1,9 +1,9 @@
 /*
  * wmlj - a LiveJournal dockapp
  *
- * (c) 2001, Sergei Barbarash <sgt@outline.ru>
+ * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: settings.c,v 1.4 2002/01/06 13:33:49 sgt Exp $
+ * $Id: settings.c,v 1.5 2002/01/06 13:45:08 sgt Exp $
  */
 
 #include <stdlib.h>

@@ -1,9 +1,9 @@
 /*
  * wmlj - a LiveJournal dockapp
  *
- * (c) 2001, Sergei Barbarash <sgt@outline.ru>
+ * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: dlg.c,v 1.3 2002/01/06 00:57:17 sgt Exp $
+ * $Id: dlg.c,v 1.4 2002/01/06 13:45:08 sgt Exp $
  */
 
 /* large portions of this code was adopted from LoserJabber (see README) */
