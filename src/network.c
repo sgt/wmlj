@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: network.c,v 1.15 2002/02/06 13:46:03 sgt Exp $
+ * $Id: network.c,v 1.16 2002/02/07 16:35:27 sgt Exp $
  */
 
 #include <time.h>
@@ -316,6 +316,7 @@ gboolean
 lj_login() {
   GHashTable *hash;
   GString *req_str;
+  gpointer fastserver;
 
   req_str = lj_protocol_string_new("login");
   g_string_sprintfa(req_str, "clientversion=%s&", USERAGENT);
@@ -338,7 +339,11 @@ lj_login() {
   }
 
   /* check if we can use the fast server */
-  conf.use_fast = (atoi(g_hash_table_lookup(hash, "fastserver")) != 0);
+  fastserver = g_hash_table_lookup(hash, "fastserver");
+  if (fastserver != NULL)
+    conf.use_fast = (atoi(fastserver) != 0);
+  else
+    conf.use_fast = FALSE;
 
   /* add the web links */
   /* wmlj_menu_add_web(hash); */
