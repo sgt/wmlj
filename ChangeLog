@@ -1,3 +1,7 @@
+2002-01-06  Sergei Barbarash  <sgt@livejournal.com>
+
+	* added an initial check_friends()
+
 2002-01-06  Sergei Barbarash  <sgt@fep.ru>
 
 	* Release 0.2

@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: rc.c,v 1.7 2002/01/06 15:48:00 sgt Exp $
+ * $Id: rc.c,v 1.8 2002/01/08 10:19:36 sgt Exp $
  */
 
 #include <stdio.h>
@@ -86,7 +86,7 @@ rc_config_default(Config *conf) {
 
   conf->use_proxy = FALSE;
   conf->proxy_server = g_strdup("");
-  conf->proxy_port = 80;
+  conf->proxy_port = 3128;
 
   conf->interval = 300;
 

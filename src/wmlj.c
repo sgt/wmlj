@@ -3,7 +3,7 @@
  *
  * (c) 2001,2002 Sergei Barbarash <sgt@livejournal.com>
  *
- * $Id: wmlj.c,v 1.7 2002/01/06 15:48:00 sgt Exp $
+ * $Id: wmlj.c,v 1.8 2002/01/08 10:19:36 sgt Exp $
  */
 
 #include <gtk/gtk.h>
@@ -200,6 +200,9 @@ int main( int argc, char *argv[] ) {
     /* perform a client login */
     lj_login();
   }
+
+  /* Run an initial check for friendlist */
+  check_friends();
 
   /* Timed events */
   wmlj_cf_timeout_add();
