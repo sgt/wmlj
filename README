@@ -1,0 +1,61 @@
+$Id: README,v 1.1 2002/01/05 15:31:17 sgt Exp $
+
+Introduction
+------------
+
+wmlj is a WindowMaker dock-app that sits in the corner of your screen
+and monitors your Friends List at livejournal.com. Now that LJ
+addiction spreads its slimy tentacles all over the world, such a
+program becomes absolutely essential for every Unix desktop.
+
+
+Requirements
+------------
+wmlj requires GTK+ 1.2 or greater
+(http://www.gtk.org/)
+
+wmlj also requires libcurl, an multiprotocol transfer library
+(http://curl.haxx.se/libcurl/)
+
+
+Getting Started
+---------------
+In order to use wmlj, you need a valid LiveJournal account, which you
+can create at http://livejournal.com/
+
+The installation os fairly obvious.
+Running:
+	$ ./configure 
+	$ make
+	$ su
+	# make install
+should be all you need to install it.
+
+The installed executable is called "wmlj".
+
+Using wmlj
+------------
+Refer to the man page - wmlj(1).
+
+Known Bugs
+----------
+Too much.
+
+Authors
+-------
+Sergei Barbarash <sgt@outline.ru>, <sgt@livejournal.com>
+
+Thanks
+------
+Brad Fitzpatrick <bradfitz@livejournal.com> - for making LiveJournal!
+
+Evan Martin <evan@livejournal.com> - for writing LogJam
+(http://logjam.danga.com), a great GTK+ LJ client, which provided me
+with insipration and also gave me some insights into the inner
+workings of GTK+. Some wmlj code is based on LogJam.
+
+Alexey Vyskubov <alexey@pepper.spb.ru> - for writing foodock library
+(http://freshmeat.net/projects/foodock/), which spared me the hassle
+of figuring out how to write a dockapp.
+
+Olya <email pending> - my cat, for purring on my nap while I wrote this

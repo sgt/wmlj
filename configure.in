@@ -1,0 +1,23 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(src/wmlj.c)
+AM_INIT_AUTOMAKE(wmlj, cvs)
+AM_CONFIG_HEADER(config.h)
+
+dnl Checks for programs
+AC_PROG_CC
+
+dnl Checks for libraries.
+AM_PATH_GTK(1.2.0, , exit 1, gthread)
+
+dnl Check for libcurl.
+AC_PATH_PROG(CURL_CONFIG, curl-config, no)
+if test "$CURL_CONFIG" = "no" ; then
+AC_MSG_ERROR(the curl-config script installed by libcurl could not be found.
+libcurl is required.)
+fi
+CURL_CFLAGS="`curl-config --cflags`"
+CURL_LIBS="`curl-config --libs` -lcurl"
+AC_SUBST(CURL_CFLAGS)
+AC_SUBST(CURL_LIBS)
+
+AC_OUTPUT(Makefile src/Makefile)

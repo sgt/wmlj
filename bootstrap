@@ -1,0 +1,9 @@
+#! /bin/sh
+
+echo "Generating build environment..."
+rm -f config.cache
+aclocal
+autoheader
+automake --add-missing --copy
+autoconf
+echo "Now run ./configure ."

@@ -1,0 +1,3 @@
+ - try to read LogJam's rc file if .wmljrc isn't there
+ - perform a valid LJ login
+ - draw a nicer animation
